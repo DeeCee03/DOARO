@@ -2,10 +2,13 @@ using UnityEngine;
 
 public class PlayerShoot : MonoBehaviour
 {
-    public GameObject bulletPrefab;
-    public Transform muzzle;            // leeres Child vorne an der Kapsel
-    public float fireRate = 8f;         // Schüsse pro Sekunde
-    public float muzzleOffset = 0.6f;   // Abstand vor der Kapsel, falls kein Muzzle gesetzt
+    [Header("Referenzen")]
+    public GameObject bulletPrefab;   // -> Bullet-Prefab aus Project
+    public Transform muzzle;          // -> Empty vor der Kapsel
+
+    [Header("Schuss-Einstellungen")]
+    public float fireRate = 8f;       // Schüsse pro Sekunde
+    public float muzzleOffset = 0.6f; // Fallback falls kein Muzzle gesetzt
 
     float fireTimer;
 
@@ -25,10 +28,17 @@ public class PlayerShoot : MonoBehaviour
 
     void Shoot()
     {
-        Vector3 spawnPos = muzzle ? muzzle.position : (transform.position + transform.forward * muzzleOffset + Vector3.up * 0.5f);
+        Vector3 spawnPos = muzzle
+            ? muzzle.position
+            : (transform.position + transform.forward * muzzleOffset + Vector3.up * 0.5f);
         Quaternion rot = transform.rotation;
 
-        var bullet = Instantiate(bulletPrefab, spawnPos, rot);
-        // später ersetzen wir Instantiate durch ein Pooling-System
+        GameObject bulletGO = Instantiate(bulletPrefab, spawnPos, rot);
+
+        // Verhindern, dass die Kugel sofort den Spieler trifft
+        Collider playerCol = GetComponent<Collider>();
+        Collider bulletCol = bulletGO.GetComponent<Collider>();
+        if (playerCol && bulletCol)
+            Physics.IgnoreCollision(playerCol, bulletCol, true);
     }
 }
