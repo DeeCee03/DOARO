@@ -30,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
    void FixedUpdate()
 {
 
-    Vector3 currentPlanarVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+    Vector3 currentPlanarVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
     Vector3 targetVel       = input * moveSpeed;
 
 
