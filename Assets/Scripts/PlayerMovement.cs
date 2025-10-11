@@ -27,27 +27,18 @@ public class PlayerMovement : MonoBehaviour
         if (input.sqrMagnitude > 1f) input.Normalize(); // gleichmäßige Diagonalen
     }
 
-    void FixedUpdate()
-    {
-        // aktuelle & Zielgeschwindigkeit (nur XZ)
-        Vector3 currentPlanarVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        Vector3 targetVel       = input * moveSpeed;
+   void FixedUpdate()
+{
 
-        // sanft Richtung Zielgeschwindigkeit
-        Vector3 newPlanarVel = Vector3.MoveTowards(
-            currentPlanarVel, targetVel, acceleration * Time.fixedDeltaTime
-        );
+    Vector3 currentPlanarVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+    Vector3 targetVel       = input * moveSpeed;
 
-        // bewegen (Y bleibt dank Constraint fix)
-        rb.MovePosition(rb.position + newPlanarVel * Time.fixedDeltaTime);
 
-        // in Bewegungsrichtung drehen (falls wir uns bewegen)
-        if (newPlanarVel.sqrMagnitude > 0.001f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(newPlanarVel, Vector3.up);
-            rb.MoveRotation(Quaternion.RotateTowards(
-                rb.rotation, targetRot, rotationSpeed * Time.fixedDeltaTime
-            ));
-        }
-    }
+    Vector3 newPlanarVel = Vector3.MoveTowards(
+        currentPlanarVel, targetVel, acceleration * Time.fixedDeltaTime
+    );
+
+    rb.MovePosition(rb.position + newPlanarVel * Time.fixedDeltaTime);
+
+}
 }

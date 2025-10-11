@@ -25,20 +25,20 @@ public class PlayerShoot : MonoBehaviour
             Shoot();
         }
     }
+void Shoot()
+{
+    Vector3 spawnPos = muzzle
+        ? muzzle.position
+        : (transform.position + transform.forward * muzzleOffset + Vector3.up * 0.5f);
 
-    void Shoot()
-    {
-        Vector3 spawnPos = muzzle
-            ? muzzle.position
-            : (transform.position + transform.forward * muzzleOffset + Vector3.up * 0.5f);
-        Quaternion rot = transform.rotation;
 
-        GameObject bulletGO = Instantiate(bulletPrefab, spawnPos, rot);
+    Quaternion rot = muzzle ? muzzle.rotation : transform.rotation;
 
-        // Verhindern, dass die Kugel sofort den Spieler trifft
-        Collider playerCol = GetComponent<Collider>();
-        Collider bulletCol = bulletGO.GetComponent<Collider>();
-        if (playerCol && bulletCol)
-            Physics.IgnoreCollision(playerCol, bulletCol, true);
-    }
+    GameObject bulletGO = Instantiate(bulletPrefab, spawnPos, rot);
+
+    Collider playerCol = GetComponent<Collider>();
+    Collider bulletCol = bulletGO.GetComponent<Collider>();
+    if (playerCol && bulletCol)
+        Physics.IgnoreCollision(playerCol, bulletCol, true);
+}
 }
