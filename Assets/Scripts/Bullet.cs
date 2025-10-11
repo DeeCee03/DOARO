@@ -3,34 +3,46 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour
 {
-    public float speed = 25f;
+    public float speed = 20f;
     public float lifeTime = 2f;
 
-    Rigidbody rb;
-    float timer;
+    private float life;
+    private Rigidbody rb;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        if (!rb) rb = gameObject.AddComponent<Rigidbody>();
         rb.useGravity = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
     }
 
-    void OnEnable() => timer = lifeTime;
+    void OnEnable() { life = lifeTime; }
 
     void FixedUpdate()
     {
-        // Bewegung straight forward
         rb.MovePosition(rb.position + transform.forward * speed * Time.fixedDeltaTime);
 
-        timer -= Time.fixedDeltaTime;
-        if (timer <= 0f)
-            Destroy(gameObject);
+        life -= Time.fixedDeltaTime;
+        if (life <= 0f) gameObject.SetActive(false); // später: Pool zurück
     }
 
+    // Physikalische Kollision
     void OnCollisionEnter(Collision col)
     {
-        // später: Schaden usw.
-        Destroy(gameObject);
+        if (col.collider.CompareTag("Enemy"))
+            Destroy(col.collider.gameObject); // Enemy stirbt
+
+        gameObject.SetActive(false); // Bullet weg
+    }
+
+    // Trigger-Kollision (weil Enemy-Collider isTrigger=true)
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            Destroy(other.gameObject);   // Enemy stirbt
+            gameObject.SetActive(false); // Bullet weg
+        }
     }
 }
