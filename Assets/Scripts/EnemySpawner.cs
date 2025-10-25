@@ -34,22 +34,33 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    Vector3 GetSpawnPosition()
+Vector3 GetSpawnPosition()
+{
+    // Versuche bis zu 20 Positionen zu finden
+    for (int i = 0; i < 20; i++)
     {
- 
-        for (int i = 0; i < 10; i++)
+        // zufälliger Punkt im Ring um den Spieler
+        Vector2 r = Random.insideUnitCircle.normalized * Random.Range(minDistanceToPlayer, spawnRadius);
+        Vector3 pos = player.position + new Vector3(r.x, 0f, r.y);
+        pos.y = 1f; // auf Bodenhöhe
+
+        // check: ist dort Platz? (kein Collider außer Boden erlaubt)
+        // LayerMask: prüft gegen ALLE Layer außer Ground & Player (diese dürfen ignoriert werden)
+        int mask = ~LayerMask.GetMask("Ground", "Player");
+
+        if (!Physics.CheckSphere(pos, 0.6f, mask))
         {
-            Vector2 r = Random.insideUnitCircle.normalized * Random.Range(minDistanceToPlayer, spawnRadius);
-            Vector3 pos = player.position + new Vector3(r.x, 0f, r.y);
-            pos.y = 1f; 
+            // position ist frei
             return pos;
         }
-        // Fallback
-        return player.position + new Vector3(spawnRadius, 1f, 0f);
     }
 
-    int CountAliveEnemies()
-    {
-        return GameObject.FindGameObjectsWithTag("Enemy").Length;
-    }
+    // Fallback (wenn kein freier Platz gefunden wurde)
+    return player.position + new Vector3(spawnRadius, 1f, 0f);
+}
+
+int CountAliveEnemies()
+{
+    return GameObject.FindGameObjectsWithTag("Enemy").Length;
+}
 }
