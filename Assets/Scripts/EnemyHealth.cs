@@ -24,7 +24,8 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        // später ersetzen durch Explosion, Animation, Pool etc.
+        if (KillCounterUI.Instance != null)
+        KillCounterUI.Instance.AddKill();
         Destroy(gameObject);
     }
 }
