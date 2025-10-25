@@ -5,6 +5,8 @@ public class EnemyHealth : MonoBehaviour
     [Header("Health Settings")]
     public int maxHealth = 3;   
     private int currentHealth;
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
 
     void Awake()
     {
