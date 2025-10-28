@@ -4,42 +4,57 @@ using UnityEngine;
 [RequireComponent(typeof(CapsuleCollider))]
 public class EnemyChase : MonoBehaviour
 {
+    [Header("Bewegung")]
     public Transform target;
     public float moveSpeed = 3.0f;
     public float stopDistance = 0.5f;
 
-    Rigidbody rb;
+    [Header("Boden-Check")]
+    public float groundCheckDistance = 1.1f;
+    public LayerMask groundMask;
+
+    private Rigidbody rb;
+    private bool isGrounded;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        rb.useGravity = false;
-        rb.isKinematic = false; // Physik aktiv
+        rb.useGravity = true; // ✅ jetzt aktiv – Enemy fällt
+        rb.isKinematic = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
-        rb.constraints = RigidbodyConstraints.FreezeRotation; // kein Umkippen
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
     }
 
     void FixedUpdate()
     {
-        if (!target) { rb.linearVelocity = Vector3.zero; return; }
+        if (!target)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            return;
+        }
 
+        // 🔹 Boden prüfen – Raycast direkt nach unten
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundMask);
+
+        // Richtung zum Spieler
         Vector3 to = target.position - rb.position;
         to.y = 0f;
         float dist = to.magnitude;
 
+        // Falls zu nah: stehen bleiben
         if (dist <= stopDistance)
         {
-            rb.linearVelocity = Vector3.zero;
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
         }
 
+        // Bewegung nur horizontal, Y übernimmt Gravitation
         Vector3 dir = to.normalized;
+        Vector3 vel = new Vector3(dir.x * moveSpeed, rb.linearVelocity.y, dir.z * moveSpeed);
+        rb.linearVelocity = vel;
 
-        // Bewegung über Physik (Kollisionen werden korrekt aufgelöst)
-        rb.linearVelocity = new Vector3(dir.x * moveSpeed, 0f, dir.z * moveSpeed);
-
-        // hübsch ausrichten (optional)
+        // Sanfte Rotation in Bewegungsrichtung
         if (dir.sqrMagnitude > 0.0001f)
         {
             Quaternion look = Quaternion.LookRotation(dir, Vector3.up);
@@ -47,13 +62,19 @@ public class EnemyChase : MonoBehaviour
         }
     }
 
-    // Spieler-Hit über physische Kollision (kein Trigger nötig)
     void OnCollisionEnter(Collision col)
     {
         if (col.collider.CompareTag("Player"))
         {
-            col.collider.gameObject.SetActive(false); // Player „tot“
-            gameObject.SetActive(false);              // Enemy optional despawn
+            col.collider.gameObject.SetActive(false); // Player tot
+            gameObject.SetActive(false);              // Enemy despawn
         }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        // Nur visuell im Editor – zeigt GroundCheck-Strahl
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
     }
 }

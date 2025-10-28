@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        rb.useGravity = false; // Top-Down, Y ist fix
+        rb.useGravity = true; // Top-Down, Y ist fix
     }
 
     void Update()
@@ -38,7 +38,8 @@ public class PlayerMovement : MonoBehaviour
         currentPlanarVel, targetVel, acceleration * Time.fixedDeltaTime
     );
 
-    rb.MovePosition(rb.position + newPlanarVel * Time.fixedDeltaTime);
-
+   Vector3 move = newPlanarVel * Time.fixedDeltaTime;
+    move.y = 0f; 
+    rb.MovePosition(rb.position + move);
 }
 }

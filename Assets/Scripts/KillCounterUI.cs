@@ -29,7 +29,7 @@ public class KillCounterUI : MonoBehaviour
 
     void OnGUI()
     {
-          string text = $"🧟: {killCount}";
+          string text = $"🧟{killCount}";
     Vector2 pos = new Vector2(20, 20);
 
  
