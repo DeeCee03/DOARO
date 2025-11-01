@@ -2,65 +2,65 @@ using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
+    [Header("References")]
     public GameObject enemyPrefab;
     public Transform player;
 
-    [Header("Spawn-Logik")]
-    public float spawnInterval = 2.0f;
-    public int maxAlive = 20;
+    [Header("Spawn Settings")]
     public float spawnRadius = 15f;
     public float minDistanceToPlayer = 6f;
 
-    float timer;
+    [Header("Legacy Auto-Spawn (off)")]
+    public bool autoSpawn = false;
+    public float spawnInterval = 2f;
+    public int maxAlive = 20;
+
+    private float timer;
 
     void Update()
     {
+
+        if (!autoSpawn) return;
         if (!enemyPrefab || !player) return;
 
         timer += Time.deltaTime;
         if (timer >= spawnInterval)
         {
             timer = 0f;
-
-
-            int alive = CountAliveEnemies();
-            if (alive >= maxAlive) return;
-
-            Vector3 pos = GetSpawnPosition();
-            var enemy = Instantiate(enemyPrefab, pos, Quaternion.identity);
-
-            var chase = enemy.GetComponent<EnemyChase>();
-            if (chase) chase.target = player;
+            if (CountAliveEnemies() >= maxAlive) return;
+            SpawnEnemyInstant();
         }
     }
 
-Vector3 GetSpawnPosition()
-{
-    // Versuche bis zu 20 Positionen zu finden
-    for (int i = 0; i < 20; i++)
+    public void SpawnEnemyInstant()
     {
-        // zufälliger Punkt im Ring um den Spieler
-        Vector2 r = Random.insideUnitCircle.normalized * Random.Range(minDistanceToPlayer, spawnRadius);
-        Vector3 pos = player.position + new Vector3(r.x, 0f, r.y);
-        pos.y = 1f; // auf Bodenhöhe
+        if (!enemyPrefab || !player) return;
 
-        // check: ist dort Platz? (kein Collider außer Boden erlaubt)
-        // LayerMask: prüft gegen ALLE Layer außer Ground & Player (diese dürfen ignoriert werden)
-        int mask = ~LayerMask.GetMask("Ground", "Player");
+        Vector3 pos = GetSpawnPosition();
+        var enemy = Instantiate(enemyPrefab, pos, Quaternion.identity);
 
-        if (!Physics.CheckSphere(pos, 0.6f, mask))
-        {
-            // position ist frei
-            return pos;
-        }
+        var chase = enemy.GetComponent<EnemyChase>();
+        if (chase) chase.target = player;
     }
 
-    // Fallback (wenn kein freier Platz gefunden wurde)
-    return player.position + new Vector3(spawnRadius, 1f, 0f);
-}
+    Vector3 GetSpawnPosition()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            Vector2 r = Random.insideUnitCircle.normalized * Random.Range(minDistanceToPlayer, spawnRadius);
+            Vector3 pos = player.position + new Vector3(r.x, 0f, r.y);
+            pos.y = 1f;
 
-int CountAliveEnemies()
-{
-    return GameObject.FindGameObjectsWithTag("Enemy").Length;
-}
+            int mask = ~LayerMask.GetMask("Ground", "Player");
+            if (!Physics.CheckSphere(pos, 0.6f, mask))
+                return pos;
+        }
+
+        return player.position + new Vector3(spawnRadius, 1f, 0f);
+    }
+
+    public int CountAliveEnemies()
+    {
+        return GameObject.FindGameObjectsWithTag("Enemy").Length;
+    }
 }
