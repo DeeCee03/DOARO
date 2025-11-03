@@ -180,6 +180,10 @@ MonoBehaviour:
   target: {fileID: 0}
   moveSpeed: 1
   stopDistance: 0.5
+  groundCheckDistance: 1.1
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &-8009113476793186502
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -239,4 +243,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 3928519009468468366}
   offset: {x: 0, y: 2, z: 0}
-  size: {x: 1.2, y: 0.2}
+  size: {x: 1, y: 0.1}
